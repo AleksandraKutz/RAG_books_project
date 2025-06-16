@@ -121,8 +121,8 @@ def get_books():
     return jsonify(BOOKS_INFO)
 
 if __name__ == '__main__':
-    print("🚀 Starting RAG application...")
-    print("📚 Books in the system:")
+    print("Starting RAG application...")
+    print("Books in the system:")
     for filename, info in BOOKS_INFO.items():
         print(f"   - {info['title']} ({info['author']}, {info['year']})")
     

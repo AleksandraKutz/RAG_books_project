@@ -29,11 +29,11 @@ class BookRAGSystem:
     
     def load_and_process_books(self):
         """Loads and processes all books"""
-        print("🔄 Loading books...")
+        print("Loading books...")
         txt_files = [f for f in os.listdir(self.folder_path) if f.endswith(".txt")]
         
         for file_idx, filename in enumerate(txt_files):
-            print(f"📖 Processing: {filename}")
+            print(f"Processing: {filename}")
             
             # Load and clean text
             with open(os.path.join(self.folder_path, filename), "r", encoding="utf-8") as f:
@@ -64,7 +64,7 @@ class BookRAGSystem:
                     'word_count': len(chunk.split())
                 })
         
-        print(f"✅ Loaded {len(txt_files)} books, {len(self.chunks)} chunks")
+        print(f"Loaded {len(txt_files)} books, {len(self.chunks)} chunks")
         return self
     
     def clean_gutenberg_text(self, text: str) -> str:
@@ -102,10 +102,10 @@ class BookRAGSystem:
     
     def build_index(self):
         """Builds FAISS index"""
-        print("🔍 Building vector index...")
+        print("Building vector index...")
         
         # Create embeddings with batch processing for better performance
-        print("   📊 Creating embeddings...")
+        print("Creating embeddings...")
         embeddings = self.model.encode(
             self.chunks, 
             convert_to_tensor=True, 
@@ -121,7 +121,7 @@ class BookRAGSystem:
         self.index = faiss.IndexFlatL2(dim)
         self.index.add(embeddings_np)
         
-        print(f"✅ Index built: {self.index.ntotal} vectors, dimension: {dim}")
+        print(f"Index built: {self.index.ntotal} vectors, dimension: {dim}")
         return self
     
     def search(self, query: str, k: int = 5) -> Tuple[List[str], List[dict]]:
@@ -207,29 +207,29 @@ Answer:"""
 
 # Use system
 def main():
-    # Klucz API jest importowany z config.py
+    # API from config.py
     
-    # Inicjalizuj system
+    # Initializing system
     rag = BookRAGSystem("gutenberg_books")
     
-    # Zbuduj bazę wiedzy
+    # Create base
     rag.load_and_process_books().build_index()
     
-    # Wyświetl statystyki
+    # Show stats
     stats = rag.get_stats()
-    print(f"\n📊 System statistics:")
+    print(f"\nSystem statistics:")
     print(f"Books: {stats['books_count']}")
     print(f"Chunks: {stats['chunks_count']}")
     print(f"Average chunk length: {stats['avg_chunk_length']:.1f} words")
     print(f"Total word count: {stats['total_words']:,}")
     
-    print(f"\n📚 Loaded books:")
+    print(f"\nLoaded books:")
     for book in stats['books_info']:
         print(f"- {book['title'][:60]}... ({book['word_count']:,} words)")
     
-    # Interaktywna pętla Q&A
+    # Q&A
     print("\n" + "="*60)
-    print("🤖 System RAG ready! Ask questions (type 'quit' to exit)")
+    print("System RAG ready! Ask questions (type 'quit' to exit)")
     print("="*60)
     
     while True:
@@ -241,13 +241,13 @@ def main():
         if not query:
             continue
         
-        print("\n🔍 Searching for answer...")
+        print("\nSearching for answer...")
         result = rag.generate_answer(query)
         
-        print(f"\n💡 Answer:")
+        print(f"\nAnswer:")
         print(result['answer'])
         
-        print(f"\n📖 Sources ({len(result['sources'])}):")
+        print(f"\nSources ({len(result['sources'])}):")
         for i, source in enumerate(result['sources'], 1):
             print(f"{i}. {source['title'][:50]}... (similarity: {source['similarity_score']:.3f})")
 

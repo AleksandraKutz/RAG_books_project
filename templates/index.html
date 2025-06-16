@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📚 Classic Books RAG System</title>
+    <title> Classic Books RAG System</title>
     <style>
         * {
             margin: 0;
@@ -383,11 +383,11 @@
         function displayStats(stats) {
             const statsDiv = document.getElementById('stats');
             statsDiv.innerHTML = `
-                <strong>📊 System statistics:</strong><br>
-                📚 Books: ${stats.books_count}<br>
-                📄 Chunks: ${stats.chunks_count}<br>
-                📝 Average Chunk Length: ${Math.round(stats.avg_chunk_length)} words<br>
-                🔤 Total Word Count: ${stats.total_words.toLocaleString()}
+                <strong>System statistics:</strong><br>
+                Books: ${stats.books_count}<br>
+                Chunks: ${stats.chunks_count}<br>
+                Average Chunk Length: ${Math.round(stats.avg_chunk_length)} words<br>
+                Total Word Count: ${stats.total_words.toLocaleString()}
             `;
         }
         
@@ -456,7 +456,7 @@
             `;
             
             // Show sources
-            let sourcesHtml = '<h4>📚 Sources:</h4>';
+            let sourcesHtml = '<h4>Sources:</h4>';
             data.sources.forEach((source, index) => {
                 const bookInfo = Object.values(booksData).find(book => 
                     source.title.includes(book.title.substring(0, 20)) || 
@@ -485,7 +485,7 @@
             
             responseContent.innerHTML = `
                 <div class="error">
-                    <strong>❌ Error:</strong><br>
+                    <strong>Error:</strong><br>
                     ${message}
                 </div>
             `;
