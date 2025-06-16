@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Classic Books RAG System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .chat-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .books-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            height: fit-content;
+        }
+        
+        .question-form {
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        #questionInput {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        #questionInput:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        #askButton {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        
+        #askButton:hover {
+            transform: translateY(-2px);
+        }
+        
+        #askButton:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .example-questions {
+            margin-bottom: 20px;
+        }
+        
+        .example-questions h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .example-btn {
+            display: inline-block;
+            margin: 5px;
+            padding: 8px 15px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .example-btn:hover {
+            background: #e0e0e0;
+        }
+        
+        .response-section {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .response-section.active {
+            display: block;
+        }
+        
+        .response-content {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .sources {
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+        }
+        
+        .sources h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .source-item {
+            background: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+            font-size: 14px;
+        }
+        
+        .books-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .book-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.2s;
+        }
+        
+        .book-card:hover {
+            transform: translateX(5px);
+        }
+        
+        .book-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .book-author {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .book-year {
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .book-description {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.4;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+        }
+        
+        .stats {
+            background: #e8f4f8;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .error {
+            background: #ffe6e6;
+            color: #d32f2f;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Classic Books RAG System</h1>
+            <p>Ask questions and get answers based on classic self-help books.</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="chat-section">
+                <div class="question-form">
+                    <h2>💭 Ask a Question</h2>
+                    
+                    <div class="example-questions">
+                        <h3> Example Questions:</h3>
+                        <button class="example-btn" onclick="askExample('What is the best way to learn?')">
+                            What is the best way to learn?
+                        </button>
+                        <button class="example-btn" onclick="askExample('How to manage time effectively?')">
+                            How to manage time effectively?
+                        </button>
+                        <button class="example-btn" onclick="askExample('What are the principles of success?')">
+                            What are the principles of success?
+                        </button>
+                        <button class="example-btn" onclick="askExample('How to build good habits?')">
+                            How to build good habits?
+                        </button>
+                        <button class="example-btn" onclick="askExample('What is the power of positive thinking?')">
+                            What is the power of positive thinking?
+                        </button>
+                    </div>
+                    
+                    <div class="input-group">
+                        <input type="text" id="questionInput" placeholder="Type your question in English..." 
+                               onkeypress="handleKeyPress(event)">
+                        <button id="askButton" onclick="askQuestion()">Ask</button>
+                    </div>
+                </div>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    I'm looking for answers in classic books...
+                </div>
+                
+                <div class="response-section" id="responseSection">
+                    <div class="response-content" id="responseContent"></div>
+                    <div class="sources" id="sources"></div>
+                </div>
+            </div>
+            
+            <div class="books-section">
+                <h2> Books in the System</h2>
+                <div class="stats" id="stats">
+                    <strong> Statistics:</strong><br>
+                    Loading...
+                </div>
+                <div class="books-grid" id="booksGrid">
+                    <!-- Books will load here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add books from API
+        let booksData = {};
+        
+        // Initializing website
+        document.addEventListener('DOMContentLoaded', function() {
+            loadBooks();
+            loadStats();
+        });
+        
+        async function loadBooks() {
+            try {
+                const response = await fetch('/books');
+                booksData = await response.json();
+                displayBooks();
+            } catch (error) {
+                console.error('Error with loading books:', error);
+            }
+        }
+        
+        async function loadStats() {
+            try {
+                const response = await fetch('/stats');
+                const stats = await response.json();
+                displayStats(stats);
+            } catch (error) {
+                console.error('Error with loading statistics:', error);
+            }
+        }
+        
+        function displayBooks() {
+            const booksGrid = document.getElementById('booksGrid');
+            booksGrid.innerHTML = '';
+            
+            Object.entries(booksData).forEach(([filename, book]) => {
+                const bookCard = document.createElement('div');
+                bookCard.className = 'book-card';
+                bookCard.innerHTML = `
+                    <div class="book-title">${book.title}</div>
+                    <div class="book-author">Author: ${book.author}</div>
+                    <div class="book-year">Year: ${book.year}</div>
+                    <div class="book-description">${book.description}</div>
+                `;
+                booksGrid.appendChild(bookCard);
+            });
+        }
+        
+        function displayStats(stats) {
+            const statsDiv = document.getElementById('stats');
+            statsDiv.innerHTML = `
+                <strong>📊 System statistics:</strong><br>
+                📚 Books: ${stats.books_count}<br>
+                📄 Chunks: ${stats.chunks_count}<br>
+                📝 Average Chunk Length: ${Math.round(stats.avg_chunk_length)} words<br>
+                🔤 Total Word Count: ${stats.total_words.toLocaleString()}
+            `;
+        }
+        
+        function askExample(question) {
+            document.getElementById('questionInput').value = question;
+            askQuestion();
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                askQuestion();
+            }
+        }
+        
+        async function askQuestion() {
+            const questionInput = document.getElementById('questionInput');
+            const question = questionInput.value.trim();
+            
+            if (!question) {
+                alert('Please ask a question');
+                return;
+            }
+            
+            // Show loading
+            showLoading(true);
+            setButtonState(false);
+            
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ question: question })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    displayResponse(data);
+                }
+                
+            } catch (error) {
+                showError(`Error with connection: ${error.message}`);
+            } finally {
+                showLoading(false);
+                setButtonState(true);
+            }
+        }
+        
+        function displayResponse(data) {
+            const responseSection = document.getElementById('responseSection');
+            const responseContent = document.getElementById('responseContent');
+            const sources = document.getElementById('sources');
+            
+            // Forrmatted answer (keep structure markdown)
+            const formattedAnswer = data.answer
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+            
+            responseContent.innerHTML = `
+                <h3>💡 Answer:</h3>
+                <div style="margin: 15px 0; line-height: 1.7;">${formattedAnswer}</div>
+            `;
+            
+            // Show sources
+            let sourcesHtml = '<h4>📚 Sources:</h4>';
+            data.sources.forEach((source, index) => {
+                const bookInfo = Object.values(booksData).find(book => 
+                    source.title.includes(book.title.substring(0, 20)) || 
+                    source.filename === Object.keys(booksData)[index]
+                );
+                
+                sourcesHtml += `
+                    <div class="source-item">
+                        <strong>${index + 1}. ${source.title.substring(0, 50)}...</strong><br>
+                        <small>Similarity: ${source.similarity_score.toFixed(3)}</small>
+                        ${bookInfo ? `<br><small>From book: ${bookInfo.title} (${bookInfo.author})</small>` : ''}
+                    </div>
+                `;
+            });
+            
+            sources.innerHTML = sourcesHtml;
+            responseSection.classList.add('active');
+            
+            // Scroll to response
+            responseSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function showError(message) {
+            const responseSection = document.getElementById('responseSection');
+            const responseContent = document.getElementById('responseContent');
+            
+            responseContent.innerHTML = `
+                <div class="error">
+                    <strong>❌ Error:</strong><br>
+                    ${message}
+                </div>
+            `;
+            
+            document.getElementById('sources').innerHTML = '';
+            responseSection.classList.add('active');
+        }
+        
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            const responseSection = document.getElementById('responseSection');
+            
+            if (show) {
+                loading.classList.add('active');
+                responseSection.classList.remove('active');
+            } else {
+                loading.classList.remove('active');
+            }
+        }
+        
+        function setButtonState(enabled) {
+            const button = document.getElementById('askButton');
+            const input = document.getElementById('questionInput');
+            
+            button.disabled = !enabled;
+            input.disabled = !enabled;
+            
+            if (enabled) {
+                button.textContent = 'Ask';
+            } else {
+                button.textContent = 'Processing...';
+            }
+        }
+    </script>
+</body>
+</html>
