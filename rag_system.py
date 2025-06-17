@@ -32,6 +32,9 @@ class BookRAGSystem:
         print("Loading books...")
         txt_files = [f for f in os.listdir(self.folder_path) if f.endswith(".txt")]
         
+        # Import books info from app.py
+        from app import BOOKS_INFO
+        
         for file_idx, filename in enumerate(txt_files):
             print(f"Processing: {filename}")
             
@@ -41,12 +44,14 @@ class BookRAGSystem:
             
             clean_text = self.clean_gutenberg_text(raw_text)
             
-            # Extract book title (first line after cleaning)
-            title = clean_text.split('\n')[0][:100] if clean_text else filename
+            # Get book info from BOOKS_INFO
+            book_info = BOOKS_INFO.get(filename, {})
             
             self.books_info.append({
                 'filename': filename,
-                'title': title,
+                'title': book_info.get('title', clean_text.split('\n')[0][:100]),
+                'author': book_info.get('author', 'Unknown'),
+                'year': book_info.get('year', 'Unknown'),
                 'word_count': len(clean_text.split())
             })
             
@@ -60,7 +65,9 @@ class BookRAGSystem:
                     'book_index': file_idx,
                     'chunk_index': chunk_idx,
                     'filename': filename,
-                    'title': title,
+                    'title': book_info.get('title', clean_text.split('\n')[0][:100]),
+                    'author': book_info.get('author', 'Unknown'),
+                    'year': book_info.get('year', 'Unknown'),
                     'word_count': len(chunk.split())
                 })
         
@@ -73,17 +80,34 @@ class BookRAGSystem:
         start_idx = 0
         end_idx = len(lines)
         
+        # Find start of actual content
         for i, line in enumerate(lines):
             if line.strip().startswith('*** START OF'):
                 start_idx = i + 1
                 break
         
+        # Find end of actual content
         for i, line in enumerate(lines):
             if line.strip().startswith('*** END OF'):
                 end_idx = i
                 break
         
-        cleaned_text = "\n".join(lines[start_idx:end_idx]).strip()
+        # Get the actual content
+        content_lines = lines[start_idx:end_idx]
+        
+        # Remove common Gutenberg artifacts
+        cleaned_lines = []
+        for line in content_lines:
+            # Skip common Gutenberg artifacts
+            if any(skip in line.lower() for skip in [
+                'produced by', 'html version by', 'transcriber', 
+                'proofread by', 'distributed proofreading', 
+                'gutenberg', 'etext', 'ebook'
+            ]):
+                continue
+            cleaned_lines.append(line)
+        
+        cleaned_text = "\n".join(cleaned_lines).strip()
         return cleaned_text
     
     def chunk_text(self, text: str, max_words: int = 400, overlap: int = 50) -> List[str]:
@@ -140,9 +164,17 @@ class BookRAGSystem:
         retrieved_chunks = [self.chunks[i] for i in indices[0]]
         retrieved_metadata = [self.chunk_metadata[i] for i in indices[0]]
         
+        # Normalize distances to similarity scores (0 to 1, where 1 is most similar)
+        max_distance = np.max(distances[0])
+        min_distance = np.min(distances[0])
+        if max_distance > min_distance:
+            normalized_scores = 1 - ((distances[0] - min_distance) / (max_distance - min_distance))
+        else:
+            normalized_scores = np.ones_like(distances[0])
+        
         # Add similarity score
         for i, meta in enumerate(retrieved_metadata):
-            meta['similarity_score'] = float(distances[0][i])
+            meta['similarity_score'] = float(normalized_scores[i])
         
         return retrieved_chunks, retrieved_metadata
     
@@ -154,12 +186,19 @@ class BookRAGSystem:
         # Prepare context with source information
         context_parts = []
         for i, (chunk, meta) in enumerate(zip(chunks, metadata)):
+            # Get book info from books_info
+            book_info = next((book for book in self.books_info if book['filename'] == meta['filename']), None)
+            if book_info:
+                meta['title'] = book_info['title']
+                meta['author'] = book_info.get('author', 'Unknown')
+                meta['year'] = book_info.get('year', 'Unknown')
+            
             context_parts.append(f"[Source: {meta['title']}]\n{chunk}")
         
         context = "\n\n---\n\n".join(context_parts)
         
         # Prepare prompt
-        prompt = f"""Based on the following context from various books, answer the question in English.
+        prompt = f"""Based on the following context from various books, answer the question in the same language it was asked.
 
 Context:
 {context}
@@ -167,10 +206,10 @@ Context:
 Question: {query}
 
 Instructions:
-- Answer precisely based on the provided context
+- Answer precisely based on the provided context from the books
 - If possible, indicate which books/sources support your answer
 - If the context does not contain enough information, state this clearly
-- Answer in English
+- Respond in the same language as the question
 
 Answer:"""
         
@@ -227,7 +266,7 @@ def main():
     for book in stats['books_info']:
         print(f"- {book['title'][:60]}... ({book['word_count']:,} words)")
     
-    # Q&A
+   # Q&A
     print("\n" + "="*60)
     print("System RAG ready! Ask questions (type 'quit' to exit)")
     print("="*60)

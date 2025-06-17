@@ -274,14 +274,14 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📚 Classic Books RAG System</h1>
+            <h1>Classic Books RAG System</h1>
             <p>Ask questions and get answers based on classic self-help books.</p>
         </div>
         
         <div class="main-content">
             <div class="chat-section">
                 <div class="question-form">
-                    <h2>💭 Ask a Question</h2>
+                    <h2>Ask a Question</h2>
                     
                     <div class="example-questions">
                         <h3> Example Questions:</h3>
@@ -303,7 +303,7 @@
                     </div>
                     
                     <div class="input-group">
-                        <input type="text" id="questionInput" placeholder="Type your question in English..." 
+                        <input type="text" id="questionInput" placeholder="Type your question..." 
                                onkeypress="handleKeyPress(event)">
                         <button id="askButton" onclick="askQuestion()">Ask</button>
                     </div>
@@ -445,7 +445,7 @@
             const responseContent = document.getElementById('responseContent');
             const sources = document.getElementById('sources');
             
-            // Forrmatted answer (keep structure markdown)
+            // Formatted answer (keep structure markdown)
             const formattedAnswer = data.answer
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\n/g, '<br>');
@@ -457,20 +457,24 @@
             
             // Show sources
             let sourcesHtml = '<h4>Sources:</h4>';
-            data.sources.forEach((source, index) => {
-                const bookInfo = Object.values(booksData).find(book => 
-                    source.title.includes(book.title.substring(0, 20)) || 
-                    source.filename === Object.keys(booksData)[index]
-                );
-                
-                sourcesHtml += `
-                    <div class="source-item">
-                        <strong>${index + 1}. ${source.title.substring(0, 50)}...</strong><br>
-                        <small>Similarity: ${source.similarity_score.toFixed(3)}</small>
-                        ${bookInfo ? `<br><small>From book: ${bookInfo.title} (${bookInfo.author})</small>` : ''}
-                    </div>
-                `;
-            });
+            if (data.sources && data.sources.length > 0) {
+                data.sources.forEach((source, index) => {
+                    sourcesHtml += `
+                        <div class="source-item">
+                            <div class="source-header">
+                                <h5 class="source-title">${index + 1}. ${source.title}</h5>
+                                <span class="similarity-badge">Score: ${(source.similarity_score * 100).toFixed(1)}%</span>
+                            </div>
+                            <div class="source-details">
+                                <span><strong>Author:</strong> ${source.author}</span>
+                                <span><strong>Year:</strong> ${source.year || 'N/A'}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                sourcesHtml += '<p>No sources found.</p>';
+            }
             
             sources.innerHTML = sourcesHtml;
             responseSection.classList.add('active');
