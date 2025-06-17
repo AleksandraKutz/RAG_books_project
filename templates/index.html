@@ -3,271 +3,360 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Classic Books RAG System</title>
+    <title>Classic Books RAG System</title>
+    <!-- FONTY: Playfair Display, Cinzel, Crimson Text, Libre Baskerville -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cinzel:wght@700&family=Crimson+Text:wght@400;700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        /* Tła tekstur: wood grain, parchment */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Crimson Text', 'Libre Baskerville', serif;
+            background: url('https://www.transparenttextures.com/patterns/old-mathematics.png'), #E8E3D3;
             min-height: 100vh;
-            color: #333;
+            color: #2F2F2F;
+            line-height: 1.7;
         }
-        
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 40px 20px 40px 20px;
+            background: rgba(255,255,255,0.92);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(75,46,5,0.18), 0 1.5px 0 #B8860B inset;
+            border: 3px solid #CD7F32;
         }
-        
         .header {
             text-align: center;
-            margin-bottom: 40px;
-            color: white;
+            margin-bottom: 48px;
+            padding: 36px 0 24px 0;
+            background: #4B2E05;
+            color: #F5F5DC;
+            border-radius: 14px 14px 0 0;
+            box-shadow: 0 4px 16px rgba(75,46,5,0.18);
+            border-bottom: 4px solid #B8860B;
         }
-        
         .header h1 {
-            font-size: 2.5rem;
+            font-family: 'Cinzel', 'Playfair Display', serif;
+            font-size: 2.8rem;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 2px;
+            text-shadow: 0 2px 8px #4B2E05, 0 1px 0 #B8860B;
         }
-        
         .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
+            font-size: 1.25rem;
+            font-family: 'Crimson Text', serif;
+            opacity: 0.95;
         }
-        
         .main-content {
             display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 30px;
+            grid-template-columns: 1fr 370px;
+            gap: 36px;
             margin-bottom: 30px;
         }
-        
         .chat-section {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background: #ECE5D1;
+            border-radius: 16px;
+            padding: 36px 32px 32px 32px;
+            box-shadow: 0 6px 24px rgba(75,46,5,0.10);
+            border: 2.5px solid #B8860B;
+            position: relative;
         }
-        
         .books-section {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background: #ECE5D1;
+            border-radius: 16px;
+            padding: 28px 24px 24px 24px;
+            box-shadow: 0 6px 24px rgba(75,46,5,0.10);
+            border: 2.5px solid #B8860B;
             height: fit-content;
         }
-        
         .question-form {
-            margin-bottom: 30px;
+            margin-bottom: 32px;
         }
-        
         .input-group {
             display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 18px;
         }
-        
         #questionInput {
             flex: 1;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
+            padding: 16px;
+            border: 2px solid #CD7F32;
             border-radius: 10px;
-            font-size: 16px;
+            font-size: 17px;
+            background: #FAF0E6;
+            font-family: 'Libre Baskerville', serif;
+            color: #2F2F2F;
             transition: border-color 0.3s;
         }
-        
         #questionInput:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #B8860B;
+            background: #F5F5DC;
         }
-        
         #askButton {
-            padding: 15px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            padding: 16px 34px;
+            background: #4B2E05;
+            color: #F5F5DC;
             border: none;
             border-radius: 10px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 17px;
+            font-family: 'Cinzel', serif;
             font-weight: bold;
-            transition: transform 0.2s;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 8px #B8860B;
+            border-bottom: 2px solid #B8860B;
+            transition: all 0.3s;
         }
-        
         #askButton:hover {
-            transform: translateY(-2px);
+            background: #5A1A1A;
+            color: #B8860B;
+            transform: translateY(-2px) scale(1.03);
         }
-        
         #askButton:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
         }
-        
         .example-questions {
-            margin-bottom: 20px;
+            margin-bottom: 22px;
         }
-        
         .example-questions h3 {
-            color: #667eea;
-            margin-bottom: 10px;
+            color: #4B2E05;
+            margin-bottom: 12px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
         }
-        
         .example-btn {
             display: inline-block;
-            margin: 5px;
-            padding: 8px 15px;
-            background: #f0f0f0;
-            border: none;
-            border-radius: 20px;
+            margin: 6px 6px 6px 0;
+            padding: 9px 18px;
+            background: #F5F5DC;
+            border: 1.5px solid #B8860B;
+            border-radius: 22px;
             cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s;
+            font-size: 15px;
+            font-family: 'Crimson Text', serif;
+            color: #4B2E05;
+            transition: all 0.3s;
+            box-shadow: 0 1px 4px #CD7F32;
         }
-        
         .example-btn:hover {
-            background: #e0e0e0;
+            background: #B8860B;
+            color: #F5F5DC;
+            border-color: #4B2E05;
         }
-        
         .response-section {
             display: none;
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
+            background: #FAF0E6;
+            border-radius: 12px;
+            padding: 24px 20px 18px 20px;
+            margin-bottom: 22px;
+            border: 2px solid #CFB53B;
+            box-shadow: 0 2px 8px #B8860B;
         }
-        
         .response-section.active {
             display: block;
         }
-        
         .response-content {
-            line-height: 1.6;
+            line-height: 1.85;
             margin-bottom: 15px;
+            font-size: 1.13rem;
+            font-family: 'Libre Baskerville', serif;
         }
-        
         .sources {
-            border-top: 1px solid #ddd;
+            border-top: 1.5px solid #B8860B;
             padding-top: 15px;
         }
-        
         .sources h4 {
-            color: #667eea;
+            color: #4B2E05;
             margin-bottom: 10px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.05rem;
         }
-        
         .source-item {
-            background: white;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 5px;
-            border-left: 4px solid #667eea;
-            font-size: 14px;
+            background: #F5F5DC;
+            padding: 15px 18px;
+            margin: 12px 0;
+            border-radius: 8px;
+            border-left: 6px solid #5A1A1A;
+            font-size: 15px;
+            box-shadow: 0 2px 8px #CD7F32;
+            border-top: 1px solid #CFB53B;
         }
-        
+        .source-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .source-title {
+            font-family: 'Cinzel', 'Playfair Display', serif;
+            color: #4B2E05;
+            margin: 0;
+            font-size: 1.05rem;
+        }
+        .similarity-badge {
+            background: #B8860B;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            color: #FAF0E6;
+            font-family: 'Crimson Text', serif;
+            box-shadow: 0 1px 4px #CD7F32;
+        }
+        .source-details {
+            display: flex;
+            gap: 18px;
+            color: #355E3B;
+            font-size: 14px;
+            font-family: 'Crimson Text', serif;
+        }
         .books-grid {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 18px;
         }
-        
         .book-card {
-            background: #f8f9fa;
+            background: linear-gradient(90deg, #ECE5D1 80%, #FAF0E6 100%);
             border-radius: 10px;
-            padding: 15px;
-            border-left: 4px solid #667eea;
-            transition: transform 0.2s;
+            padding: 18px 16px 14px 18px;
+            border-left: 6px solid #355E3B;
+            border-bottom: 2px solid #B8860B;
+            box-shadow: 0 2px 8px #CD7F32;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        
         .book-card:hover {
-            transform: translateX(5px);
+            transform: translateX(7px) scale(1.02);
+            box-shadow: 0 4px 16px #B8860B;
         }
-        
         .book-title {
+            font-family: 'Cinzel', 'Playfair Display', serif;
             font-weight: bold;
-            color: #333;
-            margin-bottom: 5px;
+            color: #5A1A1A;
+            margin-bottom: 6px;
+            font-size: 1.15rem;
         }
-        
         .book-author {
-            color: #666;
-            font-size: 14px;
+            color: #355E3B;
+            font-size: 15px;
             margin-bottom: 5px;
+            font-family: 'Crimson Text', serif;
         }
-        
         .book-year {
-            color: #888;
-            font-size: 12px;
-            margin-bottom: 8px;
-        }
-        
-        .book-description {
+            color: #B8860B;
             font-size: 13px;
-            color: #555;
-            line-height: 1.4;
+            margin-bottom: 8px;
+            font-family: 'Crimson Text', serif;
         }
-        
+        .book-description {
+            font-size: 14px;
+            color: #2F2F2F;
+            line-height: 1.5;
+            font-family: 'Libre Baskerville', serif;
+        }
         .loading {
             display: none;
             text-align: center;
-            padding: 20px;
-            color: #667eea;
+            padding: 22px;
+            color: #4B2E05;
+            font-family: 'Cinzel', serif;
         }
-        
         .loading.active {
             display: block;
         }
-        
         .spinner {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            width: 22px;
+            height: 22px;
+            border: 3px solid #ECE5D1;
+            border-top: 3px solid #4B2E05;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-right: 10px;
         }
-        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
-        @media (max-width: 768px) {
+        .query-history {
+            margin-top: 24px;
+            padding-top: 22px;
+            border-top: 2px solid #B8860B;
+        }
+        .query-history h3 {
+            font-family: 'Cinzel', serif;
+            color: #4B2E05;
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+        }
+        .history-item {
+            background: #FAF0E6;
+            padding: 12px;
+            margin: 6px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s, color 0.3s;
+            border: 1px solid #B8860B;
+            font-family: 'Crimson Text', serif;
+        }
+        .history-item:hover {
+            background: #B8860B;
+            color: #FAF0E6;
+        }
+        .stats {
+            background: #FAF0E6;
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 22px;
+            font-size: 15px;
+            border: 2px solid #B8860B;
+            font-family: 'Crimson Text', serif;
+        }
+        .error {
+            background: #FFF3F3;
+            color: #800020;
+            padding: 16px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 5px solid #800020;
+            font-family: 'Crimson Text', serif;
+        }
+        /* Dekoracyjne ramki i linie */
+        .ornate-divider {
+            border: none;
+            border-top: 3px double #B8860B;
+            margin: 32px 0 24px 0;
+            height: 0;
+            background: none;
+        }
+        /* Responsywność */
+        @media (max-width: 900px) {
             .main-content {
                 grid-template-columns: 1fr;
             }
-            
-            .header h1 {
-                font-size: 2rem;
+            .container {
+                padding: 18px 4px 18px 4px;
             }
-            
+        }
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
             .input-group {
                 flex-direction: column;
             }
-        }
-        
-        .stats {
-            background: #e8f4f8;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        
-        .error {
-            background: #ffe6e6;
-            color: #d32f2f;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            border-left: 4px solid #d32f2f;
+            #askButton {
+                width: 100%;
+            }
+            .source-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            .source-details {
+                flex-direction: column;
+                gap: 5px;
+            }
         }
     </style>
 </head>
@@ -284,7 +373,7 @@
                     <h2>Ask a Question</h2>
                     
                     <div class="example-questions">
-                        <h3> Example Questions:</h3>
+                        <h3>Example Questions:</h3>
                         <button class="example-btn" onclick="askExample('What is the best way to learn?')">
                             What is the best way to learn?
                         </button>
@@ -303,7 +392,7 @@
                     </div>
                     
                     <div class="input-group">
-                        <input type="text" id="questionInput" placeholder="Type your question..." 
+                        <input type="text" id="questionInput" placeholder="Type your question in English..." 
                                onkeypress="handleKeyPress(event)">
                         <button id="askButton" onclick="askQuestion()">Ask</button>
                     </div>
@@ -318,12 +407,17 @@
                     <div class="response-content" id="responseContent"></div>
                     <div class="sources" id="sources"></div>
                 </div>
+                
+                <div class="query-history" id="queryHistory">
+                    <h3>Recent Questions</h3>
+                    <div id="historyList"></div>
+                </div>
             </div>
             
             <div class="books-section">
-                <h2> Books in the System</h2>
+                <h2>Books in the System</h2>
                 <div class="stats" id="stats">
-                    <strong> Statistics:</strong><br>
+                    <strong>Statistics:</strong><br>
                     Loading...
                 </div>
                 <div class="books-grid" id="booksGrid">
@@ -334,14 +428,51 @@
     </div>
 
     <script>
-        // Add books from API
         let booksData = {};
+        let queryHistory = [];
+        const MAX_HISTORY_ITEMS = 10;
         
-        // Initializing website
         document.addEventListener('DOMContentLoaded', function() {
             loadBooks();
             loadStats();
+            loadHistory();
         });
+        
+        function loadHistory() {
+            const savedHistory = localStorage.getItem('queryHistory');
+            if (savedHistory) {
+                queryHistory = JSON.parse(savedHistory);
+                updateHistoryDisplay();
+            }
+        }
+        
+        function saveHistory() {
+            localStorage.setItem('queryHistory', JSON.stringify(queryHistory));
+        }
+        
+        function updateHistoryDisplay() {
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+            
+            queryHistory.slice(0, MAX_HISTORY_ITEMS).forEach((item, index) => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.textContent = item;
+                historyItem.onclick = () => askExample(item);
+                historyList.appendChild(historyItem);
+            });
+        }
+        
+        function addToHistory(question) {
+            // Remove if already exists
+            queryHistory = queryHistory.filter(q => q !== question);
+            // Add to beginning
+            queryHistory.unshift(question);
+            // Keep only last MAX_HISTORY_ITEMS
+            queryHistory = queryHistory.slice(0, MAX_HISTORY_ITEMS);
+            saveHistory();
+            updateHistoryDisplay();
+        }
         
         async function loadBooks() {
             try {
@@ -349,7 +480,7 @@
                 booksData = await response.json();
                 displayBooks();
             } catch (error) {
-                console.error('Error with loading books:', error);
+                console.error('Error loading books:', error);
             }
         }
         
@@ -359,7 +490,7 @@
                 const stats = await response.json();
                 displayStats(stats);
             } catch (error) {
-                console.error('Error with loading statistics:', error);
+                console.error('Error loading statistics:', error);
             }
         }
         
@@ -411,7 +542,7 @@
                 return;
             }
             
-            // Show loading
+            addToHistory(question);
             showLoading(true);
             setButtonState(false);
             
@@ -433,7 +564,7 @@
                 }
                 
             } catch (error) {
-                showError(`Error with connection: ${error.message}`);
+                showError(`Connection error: ${error.message}`);
             } finally {
                 showLoading(false);
                 setButtonState(true);
@@ -445,13 +576,13 @@
             const responseContent = document.getElementById('responseContent');
             const sources = document.getElementById('sources');
             
-            // Formatted answer (keep structure markdown)
+            // Format answer bez podświetlania
             const formattedAnswer = data.answer
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\n/g, '<br>');
             
             responseContent.innerHTML = `
-                <h3>💡 Answer:</h3>
+                <h3>Answer:</h3>
                 <div style="margin: 15px 0; line-height: 1.7;">${formattedAnswer}</div>
             `;
             
@@ -459,15 +590,18 @@
             let sourcesHtml = '<h4>Sources:</h4>';
             if (data.sources && data.sources.length > 0) {
                 data.sources.forEach((source, index) => {
+                    // Upewnij się, że są wartości domyślne
+                    const author = source.author ? source.author : 'Unknown';
+                    const year = source.year ? source.year : 'N/A';
                     sourcesHtml += `
                         <div class="source-item">
                             <div class="source-header">
                                 <h5 class="source-title">${index + 1}. ${source.title}</h5>
-                                <span class="similarity-badge">Score: ${(source.similarity_score * 100).toFixed(1)}%</span>
+                                <span class="similarity-badge">Score: ${source.similarity_score && !isNaN(source.similarity_score) ? source.similarity_score.toFixed(3) : 'N/A'}</span>
                             </div>
                             <div class="source-details">
-                                <span><strong>Author:</strong> ${source.author}</span>
-                                <span><strong>Year:</strong> ${source.year || 'N/A'}</span>
+                                <span><strong>Author:</strong> ${author}</span>
+                                <span><strong>Year:</strong> ${year}</span>
                             </div>
                         </div>
                     `;

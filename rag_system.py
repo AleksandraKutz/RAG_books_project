@@ -5,30 +5,87 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import nltk
 import numpy as np
 import faiss
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer, CrossEncoder
 from nltk.tokenize import sent_tokenize
 import anthropic
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 import json
 from datetime import datetime
 import config  # Import twojego pliku config.py
+import pickle
+from pathlib import Path
+import hashlib
 
 class BookRAGSystem:
     def __init__(self, folder_path: str, model_name: str = 'all-MiniLM-L6-v2'):
         self.folder_path = folder_path
         self.model = SentenceTransformer(model_name)
+        self.cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
         self.index = None
         self.chunks = []
         self.chunk_metadata = []  # Stores info about the source of each chunk
         self.books_info = []
+        self.cache_dir = Path("cache")
+        self.cache_dir.mkdir(exist_ok=True)
         
         # Claude client
         self.claude_client = anthropic.Anthropic(
             api_key=config.ANTHROPIC_API_KEY  # Use the key from config.py
         )
     
+    def semantic_chunk_text(self, text: str, min_chunk_size: int = 100, max_chunk_size: int = 400) -> List[str]:
+        """Splits text into semantic chunks using sentence boundaries"""
+        sentences = sent_tokenize(text)
+        chunks = []
+        current_chunk = []
+        current_size = 0
+        
+        for sentence in sentences:
+            sentence_words = len(sentence.split())
+            
+            if current_size + sentence_words > max_chunk_size and current_chunk:
+                # Join current chunk and add to chunks
+                chunks.append(" ".join(current_chunk))
+                current_chunk = [sentence]
+                current_size = sentence_words
+            else:
+                current_chunk.append(sentence)
+                current_size += sentence_words
+            
+            # If we have enough content, create a new chunk
+            if current_size >= min_chunk_size and len(current_chunk) > 1:
+                chunks.append(" ".join(current_chunk))
+                current_chunk = []
+                current_size = 0
+        
+        # Add remaining content
+        if current_chunk:
+            chunks.append(" ".join(current_chunk))
+        
+        return chunks
+
+    def get_cache_path(self, text: str) -> Path:
+        """Generate cache path for a text"""
+        text_hash = hashlib.md5(text.encode()).hexdigest()
+        return self.cache_dir / f"{text_hash}.pkl"
+
+    def get_cached_embedding(self, text: str) -> np.ndarray:
+        """Get cached embedding or compute new one"""
+        cache_path = self.get_cache_path(text)
+        
+        if cache_path.exists():
+            with open(cache_path, 'rb') as f:
+                return pickle.load(f)
+        
+        embedding = self.model.encode(text, convert_to_tensor=True).cpu().numpy()
+        
+        with open(cache_path, 'wb') as f:
+            pickle.dump(embedding, f)
+        
+        return embedding
+
     def load_and_process_books(self):
-        """Loads and processes all books"""
+        """Loads and processes all books using semantic chunking"""
         print("Loading books...")
         txt_files = [f for f in os.listdir(self.folder_path) if f.endswith(".txt")]
         
@@ -55,8 +112,8 @@ class BookRAGSystem:
                 'word_count': len(clean_text.split())
             })
             
-            # Split into chunks
-            book_chunks = self.chunk_text(clean_text, max_words=400)
+            # Use semantic chunking
+            book_chunks = self.semantic_chunk_text(clean_text)
             
             # Add metadata for each chunk
             for chunk_idx, chunk in enumerate(book_chunks):
@@ -110,37 +167,17 @@ class BookRAGSystem:
         cleaned_text = "\n".join(cleaned_lines).strip()
         return cleaned_text
     
-    def chunk_text(self, text: str, max_words: int = 400, overlap: int = 50) -> List[str]:
-        """Splits text into chunks with overlap"""
-        words = text.split()
-        chunks = []
-        
-        for i in range(0, len(words), max_words - overlap):
-            chunk_words = words[i:i + max_words]
-            if len(chunk_words) < 50:  # Skip very short chunks
-                break
-            chunk = " ".join(chunk_words)
-            chunks.append(chunk)
-            
-        return chunks
-    
     def build_index(self):
-        """Builds FAISS index"""
+        """Builds FAISS index with cached embeddings"""
         print("Building vector index...")
         
-        # Create embeddings with batch processing for better performance
-        print("Creating embeddings...")
-        embeddings = self.model.encode(
-            self.chunks, 
-            convert_to_tensor=True, 
-            show_progress_bar=True,
-            batch_size=32  # Added for better performance
-        )
+        embeddings = []
+        for chunk in self.chunks:
+            embedding = self.get_cached_embedding(chunk)
+            embeddings.append(embedding)
         
-        # Convert to numpy
-        embeddings_np = embeddings.cpu().numpy().astype('float32')
+        embeddings_np = np.array(embeddings).astype('float32')
         
-        # Build FAISS index
         dim = embeddings_np.shape[1]
         self.index = faiss.IndexFlatL2(dim)
         self.index.add(embeddings_np)
@@ -148,35 +185,52 @@ class BookRAGSystem:
         print(f"Index built: {self.index.ntotal} vectors, dimension: {dim}")
         return self
     
+    def rerank_results(self, query: str, chunks: List[str], metadata: List[dict], k: int = 5) -> Tuple[List[str], List[dict]]:
+        """Rerank results using cross-encoder"""
+        # Prepare pairs for cross-encoder
+        pairs = [(query, chunk) for chunk in chunks]
+        
+        # Get cross-encoder scores
+        scores = self.cross_encoder.predict(pairs)
+        
+        # Combine scores with metadata
+        scored_results = list(zip(chunks, metadata, scores))
+        
+        # Sort by cross-encoder score
+        scored_results.sort(key=lambda x: x[2], reverse=True)
+        
+        # Take top k results
+        top_results = scored_results[:k]
+        
+        # Update metadata with cross-encoder scores
+        for _, meta, score in top_results:
+            meta['cross_encoder_score'] = float(score)
+        
+        return [r[0] for r in top_results], [r[1] for r in top_results]
+
     def search(self, query: str, k: int = 5) -> Tuple[List[str], List[dict]]:
-        """Searches for the most similar chunks"""
+        """Searches for the most similar chunks with reranking"""
         if self.index is None:
             raise ValueError("Index has not been built! Use build_index()")
         
-        # Query embedding
-        query_emb = self.model.encode([query], convert_to_tensor=True)
-        query_emb_np = query_emb.cpu().numpy().astype('float32')
-        
-        # Search
-        distances, indices = self.index.search(query_emb_np, k)
+        # Get initial results using FAISS
+        query_emb = self.get_cached_embedding(query)
+        distances, indices = self.index.search(query_emb.reshape(1, -1), k*2)  # Get more results for reranking
         
         # Retrieve chunks and metadata
         retrieved_chunks = [self.chunks[i] for i in indices[0]]
         retrieved_metadata = [self.chunk_metadata[i] for i in indices[0]]
         
-        # Normalize distances to similarity scores (0 to 1, where 1 is most similar)
-        max_distance = np.max(distances[0])
-        min_distance = np.min(distances[0])
-        if max_distance > min_distance:
-            normalized_scores = 1 - ((distances[0] - min_distance) / (max_distance - min_distance))
-        else:
-            normalized_scores = np.ones_like(distances[0])
-        
-        # Add similarity score
+        # Add initial similarity scores
         for i, meta in enumerate(retrieved_metadata):
-            meta['similarity_score'] = float(normalized_scores[i])
+            meta['similarity_score'] = float(distances[0][i])
         
-        return retrieved_chunks, retrieved_metadata
+        # Rerank results
+        reranked_chunks, reranked_metadata = self.rerank_results(
+            query, retrieved_chunks, retrieved_metadata, k
+        )
+        
+        return reranked_chunks, reranked_metadata
     
     def generate_answer(self, query: str, k: int = 5) -> dict:
         """Generates an answer using RAG"""
@@ -207,9 +261,29 @@ Question: {query}
 
 Instructions:
 - Answer precisely based on the provided context from the books
-- If possible, indicate which books/sources support your answer
-- If the context does not contain enough information, state this clearly
 - Respond in the same language as the question
+
+Style and Tone:
+- Write in a natural, conversational tone - avoid overly academic language
+- Make the answer engaging and easy to read
+- Use clear formatting with headers and bullet points where appropriate
+- Write complete sentences with proper punctuation marks (periods, commas, etc.)
+- DO NOT use highlighting or underlining of random words in the text
+- Only use bold formatting (**text**) for section headers or truly important concepts
+- Avoid emphasizing individual words unless absolutely necessary for meaning
+
+Content Guidelines:
+- Focus on practical, actionable advice
+- Focus on synthesizing information rather than quoting directly
+- Keep any references to source material very brief (max 1-2 sentences)
+- If mentioning sources, do it naturally without formal citations
+
+Language Rules:
+- Never include quotes in English when answering in Polish (or other languages)
+- If you need to reference specific information, paraphrase it in the question's language
+- Translate and adapt any key concepts to the target language
+
+- If the context doesn't contain enough information, state this clearly
 
 Answer:"""
         
