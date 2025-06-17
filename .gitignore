@@ -36,3 +36,5 @@ ENV/
 
 # Config with sensitive data
 config.py 
+
+cache/
