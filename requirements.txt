@@ -4,3 +4,5 @@ faiss-cpu==1.7.4
 nltk==3.6.3
 anthropic==0.3.0
 numpy==1.21.0
+deep-translator==1.11.4
+langdetect==1.0.9

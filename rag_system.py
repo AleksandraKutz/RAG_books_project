@@ -11,10 +11,12 @@ import anthropic
 from typing import List, Tuple, Dict
 import json
 from datetime import datetime
-import config  # Import twojego pliku config.py
+import config 
 import pickle
 from pathlib import Path
 import hashlib
+from deep_translator import GoogleTranslator
+from langdetect import detect
 
 class BookRAGSystem:
     def __init__(self, folder_path: str, model_name: str = 'all-MiniLM-L6-v2'):
@@ -234,8 +236,27 @@ class BookRAGSystem:
     
     def generate_answer(self, query: str, k: int = 5) -> dict:
         """Generates an answer using RAG"""
-        # Search for similar chunks
-        chunks, metadata = self.search(query, k)
+        # Detect if query is not in English and translate if needed
+        original_query = query
+        translated_query = query
+        detected_lang = 'en'
+        
+        print(f"\nOriginal query: {original_query}")
+        
+        try:
+            detected_lang = detect(query)
+            print(f"Detected language: {detected_lang}")
+            
+            if detected_lang != 'en':
+                translated_query = GoogleTranslator(source=detected_lang, target='en').translate(query)
+                print(f"Translated query: {translated_query}")
+        except Exception as e:
+            print(f"Translation error: {str(e)}")
+            # Continue with original query if translation fails
+            pass
+
+        # Search for similar chunks using translated query
+        chunks, metadata = self.search(translated_query, k)
         
         # Prepare context with source information
         context_parts = []
@@ -251,26 +272,21 @@ class BookRAGSystem:
         
         context = "\n\n---\n\n".join(context_parts)
         
-        # Prepare prompt
-        prompt = f"""Based on the following context from various books, answer the question in the same language it was asked.
+        # Prepare prompt for English answer
+        prompt = f"""Based on the following context from various books, answer the question.
 
 Context:
 {context}
 
-Question: {query}
+Question: {translated_query}
 
 Instructions:
 - Answer precisely based on the provided context from the books
-- Respond in the same language as the question
-
-Style and Tone:
-- Write in a natural, conversational tone - avoid overly academic language
+- Write in a natural, conversational tone
 - Make the answer engaging and easy to read
 - Use clear formatting with headers and bullet points where appropriate
-- Write complete sentences with proper punctuation marks (periods, commas, etc.)
-- DO NOT use highlighting or underlining of random words in the text
+- Write complete sentences with proper punctuation marks
 - Only use bold formatting (**text**) for section headers or truly important concepts
-- Avoid emphasizing individual words unless absolutely necessary for meaning
 
 Content Guidelines:
 - Focus on practical, actionable advice
@@ -278,16 +294,11 @@ Content Guidelines:
 - Keep any references to source material very brief (max 1-2 sentences)
 - If mentioning sources, do it naturally without formal citations
 
-Language Rules:
-- Never include quotes in English when answering in Polish (or other languages)
-- If you need to reference specific information, paraphrase it in the question's language
-- Translate and adapt any key concepts to the target language
-
 - If the context doesn't contain enough information, state this clearly
 
 Answer:"""
         
-        # Call Claude
+        # Call Claude for English answer
         try:
             response = self.claude_client.messages.create(
                 model="claude-sonnet-4-20250514",
@@ -295,13 +306,25 @@ Answer:"""
                 messages=[{"role": "user", "content": prompt}]
             )
             
-            answer = response.content[0].text
+            english_answer = response.content[0].text
+            print(f"\nEnglish answer: {english_answer}")
+            
+            # Translate answer back to original language if needed
+            if detected_lang != 'en':
+                try:
+                    answer = GoogleTranslator(source='en', target=detected_lang).translate(english_answer)
+                    print(f"Translated answer: {answer}")
+                except Exception as e:
+                    print(f"Answer translation error: {str(e)}")
+                    answer = english_answer
+            else:
+                answer = english_answer
             
         except Exception as e:
             answer = f"Error during answer generation: {str(e)}"
         
         return {
-            'query': query,
+            'query': original_query,
             'answer': answer,
             'sources': metadata,
             'context_length': len(context),
