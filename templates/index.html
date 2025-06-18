@@ -7,59 +7,70 @@
     <!-- FONTS: Playfair Display, Cinzel, Crimson Text, Libre Baskerville -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cinzel:wght@700&family=Crimson+Text:wght@400;700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* Background textures: wood grain, parchment */
+        /* === GENERAL PAGE BACKGROUND AND TYPOGRAPHY === */
+        /* Sets the main font, background texture, text color, and line height for the whole page */
         body {
             font-family: 'Crimson Text', 'Libre Baskerville', serif;
-            background: url('https://www.transparenttextures.com/patterns/old-mathematics.png'), #E8E3D3;
+            background: url('https://www.transparenttextures.com/patterns/old-mathematics.png'), #E8E3D3; /* Main background: parchment texture + color */
             min-height: 100vh;
-            color: #2F2F2F;
+            color: #2F2F2F; /* Main text color */
             line-height: 1.7;
         }
+        /* === MAIN CONTAINER STYLING === */
+        /* Controls the main app box: width, padding, background, border, shadow */
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 40px 20px 40px 20px;
-            background: rgba(255,255,255,0.92);
+            background: rgba(255,255,255,0.92); /* Slightly transparent white */
             border-radius: 18px;
             box-shadow: 0 8px 32px rgba(75,46,5,0.18), 0 1.5px 0 #B8860B inset;
-            border: 3px solid #CD7F32;
+            border: 3px solid #CD7F32; /* Bronze border */
         }
+        /* === HEADER STYLING === */
+        /* Controls the top banner: background, text color, shadow, border */
         .header {
             text-align: center;
             margin-bottom: 48px;
             padding: 36px 0 24px 0;
-            background: #4B2E05;
-            color: #F5F5DC;
+            background: #4B2E05; /* Dark brown background */
+            color: #F5F5DC; /* Light beige text */
             border-radius: 14px 14px 0 0;
             box-shadow: 0 4px 16px rgba(75,46,5,0.18);
-            border-bottom: 4px solid #B8860B;
+            border-bottom: 4px solid #B8860B; /* Gold border */
         }
         .header h1 {
             font-family: 'Cinzel', 'Playfair Display', serif;
             font-size: 2.8rem;
             margin-bottom: 10px;
             letter-spacing: 2px;
-            text-shadow: 0 2px 8px #4B2E05, 0 1px 0 #B8860B;
+            text-shadow: 0 2px 8px #4B2E05, 0 1px 0 #B8860B; /* Shadow for vintage effect */
         }
         .header p {
             font-size: 1.25rem;
             font-family: 'Crimson Text', serif;
             opacity: 0.95;
         }
+        /* === MAIN LAYOUT GRID === */
+        /* Controls the two-column layout: chat left, books right */
         .main-content {
             display: grid;
             grid-template-columns: 1fr 370px;
             gap: 36px;
             margin-bottom: 30px;
         }
+        /* === CHAT SECTION STYLING === */
+        /* Left panel: background, border, padding, shadow */
         .chat-section {
-            background: #ECE5D1;
+            background: #ECE5D1; /* Light parchment */
             border-radius: 16px;
             padding: 36px 32px 32px 32px;
             box-shadow: 0 6px 24px rgba(75,46,5,0.10);
-            border: 2.5px solid #B8860B;
+            border: 2.5px solid #B8860B; /* Gold border */
             position: relative;
         }
+        /* === BOOKS SECTION STYLING === */
+        /* Right panel: background, border, padding, shadow */
         .books-section {
             background: #ECE5D1;
             border-radius: 16px;
@@ -68,6 +79,7 @@
             border: 2.5px solid #B8860B;
             height: fit-content;
         }
+        /* === QUESTION FORM AND INPUTS === */
         .question-form {
             margin-bottom: 32px;
         }
@@ -79,23 +91,23 @@
         #questionInput {
             flex: 1;
             padding: 16px;
-            border: 2px solid #CD7F32;
+            border: 2px solid #CD7F32; /* Bronze border */
             border-radius: 10px;
             font-size: 17px;
-            background: #FAF0E6;
+            background: #FAF0E6; /* Light beige background */
             font-family: 'Libre Baskerville', serif;
             color: #2F2F2F;
             transition: border-color 0.3s;
         }
         #questionInput:focus {
             outline: none;
-            border-color: #B8860B;
-            background: #F5F5DC;
+            border-color: #B8860B; /* Gold border on focus */
+            background: #F5F5DC; /* Lighter background on focus */
         }
         #askButton {
             padding: 16px 34px;
-            background: #4B2E05;
-            color: #F5F5DC;
+            background: #4B2E05; /* Dark brown */
+            color: #F5F5DC; /* Light beige text */
             border: none;
             border-radius: 10px;
             cursor: pointer;
@@ -103,13 +115,13 @@
             font-family: 'Cinzel', serif;
             font-weight: bold;
             letter-spacing: 1px;
-            box-shadow: 0 2px 8px #B8860B;
+            box-shadow: 0 2px 8px #B8860B; /* Gold shadow */
             border-bottom: 2px solid #B8860B;
             transition: all 0.3s;
         }
         #askButton:hover {
-            background: #5A1A1A;
-            color: #B8860B;
+            background: #5A1A1A; /* Darker brown on hover */
+            color: #B8860B; /* Gold text on hover */
             transform: translateY(-2px) scale(1.03);
         }
         #askButton:disabled {
@@ -117,6 +129,7 @@
             cursor: not-allowed;
             transform: none;
         }
+        /* === EXAMPLE QUESTIONS BUTTONS === */
         .example-questions {
             margin-bottom: 22px;
         }
@@ -130,28 +143,29 @@
             display: inline-block;
             margin: 6px 6px 6px 0;
             padding: 9px 18px;
-            background: #F5F5DC;
-            border: 1.5px solid #B8860B;
+            background: #F5F5DC; /* Light beige */
+            border: 1.5px solid #B8860B; /* Gold border */
             border-radius: 22px;
             cursor: pointer;
             font-size: 15px;
             font-family: 'Crimson Text', serif;
-            color: #4B2E05;
+            color: #4B2E05; /* Dark brown text */
             transition: all 0.3s;
-            box-shadow: 0 1px 4px #CD7F32;
+            box-shadow: 0 1px 4px #CD7F32; /* Bronze shadow */
         }
         .example-btn:hover {
-            background: #B8860B;
-            color: #F5F5DC;
-            border-color: #4B2E05;
+            background: #B8860B; /* Gold background on hover */
+            color: #F5F5DC; /* Light text on hover */
+            border-color: #4B2E05; /* Dark border on hover */
         }
+        /* === ANSWER AND SOURCES SECTION === */
         .response-section {
             display: none;
-            background: #FAF0E6;
+            background: #FAF0E6; /* Light beige background */
             border-radius: 12px;
             padding: 24px 20px 18px 20px;
             margin-bottom: 22px;
-            border: 2px solid #CFB53B;
+            border: 2px solid #CFB53B; /* Gold border */
             box-shadow: 0 2px 8px #B8860B;
         }
         .response-section.active {
@@ -178,7 +192,7 @@
             padding: 15px 18px;
             margin: 12px 0;
             border-radius: 8px;
-            border-left: 6px solid #5A1A1A;
+            border-left: 6px solid #5A1A1A; /* Dark brown stripe */
             font-size: 15px;
             box-shadow: 0 2px 8px #CD7F32;
             border-top: 1px solid #CFB53B;
@@ -196,31 +210,32 @@
             font-size: 1.05rem;
         }
         .similarity-badge {
-            background: #B8860B;
+            background: #B8860B; /* Gold badge */
             padding: 4px 10px;
             border-radius: 12px;
             font-size: 13px;
-            color: #FAF0E6;
+            color: #FAF0E6; /* Light text */
             font-family: 'Crimson Text', serif;
             box-shadow: 0 1px 4px #CD7F32;
         }
         .source-details {
             display: flex;
             gap: 18px;
-            color: #355E3B;
+            color: #355E3B; /* Olive green */
             font-size: 14px;
             font-family: 'Crimson Text', serif;
         }
+        /* === BOOKS LIST STYLING === */
         .books-grid {
             display: flex;
             flex-direction: column;
             gap: 18px;
         }
         .book-card {
-            background: linear-gradient(90deg, #ECE5D1 80%, #FAF0E6 100%);
+            background: linear-gradient(90deg, #ECE5D1 80%, #FAF0E6 100%); /* Subtle gradient */
             border-radius: 10px;
             padding: 18px 16px 14px 18px;
-            border-left: 6px solid #355E3B;
+            border-left: 6px solid #355E3B; /* Olive green stripe */
             border-bottom: 2px solid #B8860B;
             box-shadow: 0 2px 8px #CD7F32;
             transition: transform 0.2s, box-shadow 0.2s;
@@ -254,6 +269,7 @@
             line-height: 1.5;
             font-family: 'Libre Baskerville', serif;
         }
+        /* === LOADING SPINNER === */
         .loading {
             display: none;
             text-align: center;
@@ -278,6 +294,7 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        /* === RECENT QUESTIONS HISTORY === */
         .query-history {
             margin-top: 24px;
             padding-top: 22px;
@@ -303,6 +320,7 @@
             background: #B8860B;
             color: #FAF0E6;
         }
+        /* === SYSTEM STATISTICS BOX === */
         .stats {
             background: #FAF0E6;
             border-radius: 10px;
@@ -312,6 +330,7 @@
             border: 2px solid #B8860B;
             font-family: 'Crimson Text', serif;
         }
+        /* === ERROR MESSAGE BOX === */
         .error {
             background: #FFF3F3;
             color: #800020;
@@ -329,7 +348,7 @@
             height: 0;
             background: none;
         }
-        /* Responsiveness */
+        /* === RESPONSIVE DESIGN === */
         @media (max-width: 900px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -361,17 +380,22 @@
     </style>
 </head>
 <body>
+    <!-- Main container for the whole app -->
     <div class="container">
+        <!-- Header section: title and subtitle -->
         <div class="header">
             <h1>Classic Books RAG System</h1>
             <p>Ask questions and get answers based on classic self-help books.</p>
         </div>
         
         <div class="main-content">
+            <!-- Left: Chat and Q&A section -->
             <div class="chat-section">
+                <!-- Question form: input and example questions -->
                 <div class="question-form">
                     <h2>Ask a Question</h2>
                     
+                    <!-- Example questions for quick testing -->
                     <div class="example-questions">
                         <h3>Example Questions:</h3>
                         <button class="example-btn" onclick="askExample('What is the best way to learn?')">
@@ -391,6 +415,7 @@
                         </button>
                     </div>
                     
+                    <!-- User input for question and ask button -->
                     <div class="input-group">
                         <input type="text" id="questionInput" placeholder="Type your question..." 
                                onkeypress="handleKeyPress(event)">
@@ -398,28 +423,34 @@
                     </div>
                 </div>
                 
+                <!-- Loading spinner and message -->
                 <div class="loading" id="loading">
                     <div class="spinner"></div>
                     I'm looking for answers in classic books...
                 </div>
                 
+                <!-- Section for displaying the answer and sources -->
                 <div class="response-section" id="responseSection">
                     <div class="response-content" id="responseContent"></div>
                     <div class="sources" id="sources"></div>
                 </div>
                 
+                <!-- Recent questions history -->
                 <div class="query-history" id="queryHistory">
                     <h3>Recent Questions</h3>
                     <div id="historyList"></div>
                 </div>
             </div>
             
+            <!-- Right: Books section (list of books in the system) -->
             <div class="books-section">
                 <h2>Books in the System</h2>
+                <!-- System statistics -->
                 <div class="stats" id="stats">
                     <strong>Statistics:</strong><br>
                     Loading...
                 </div>
+                <!-- Books grid: here the book cards will be rendered -->
                 <div class="books-grid" id="booksGrid">
                     <!-- Books will load here by JavaScript -->
                 </div>
@@ -428,16 +459,20 @@
     </div>
 
     <script>
+        // JS: Holds all book data loaded from backend
         let booksData = {};
+        // JS: Holds recent user questions
         let queryHistory = [];
         const MAX_HISTORY_ITEMS = 10;
         
+        // On page load, load books, stats, and history
         document.addEventListener('DOMContentLoaded', function() {
             loadBooks();
             loadStats();
             loadHistory();
         });
         
+        // Load question history from localStorage
         function loadHistory() {
             const savedHistory = localStorage.getItem('queryHistory');
             if (savedHistory) {
@@ -446,10 +481,12 @@
             }
         }
         
+        // Save question history to localStorage
         function saveHistory() {
             localStorage.setItem('queryHistory', JSON.stringify(queryHistory));
         }
         
+        // Update the display of recent questions
         function updateHistoryDisplay() {
             const historyList = document.getElementById('historyList');
             historyList.innerHTML = '';
@@ -463,6 +500,7 @@
             });
         }
         
+        // Add a new question to history
         function addToHistory(question) {
             // Remove if already exists
             queryHistory = queryHistory.filter(q => q !== question);
@@ -474,6 +512,7 @@
             updateHistoryDisplay();
         }
         
+        // Load books data from backend
         async function loadBooks() {
             try {
                 const response = await fetch('/books');
@@ -484,6 +523,7 @@
             }
         }
         
+        // Load system statistics from backend
         async function loadStats() {
             try {
                 const response = await fetch('/stats');
@@ -494,6 +534,7 @@
             }
         }
         
+        // Render the list of books in the right panel
         function displayBooks() {
             const booksGrid = document.getElementById('booksGrid');
             booksGrid.innerHTML = '';
@@ -511,6 +552,7 @@
             });
         }
         
+        // Render system statistics in the right panel
         function displayStats(stats) {
             const statsDiv = document.getElementById('stats');
             statsDiv.innerHTML = `
@@ -522,17 +564,20 @@
             `;
         }
         
+        // Fill the input with an example question and trigger search
         function askExample(question) {
             document.getElementById('questionInput').value = question;
             askQuestion();
         }
         
+        // Handle Enter key in the input
         function handleKeyPress(event) {
             if (event.key === 'Enter') {
                 askQuestion();
             }
         }
         
+        // Main function: send question to backend and display answer
         async function askQuestion() {
             const questionInput = document.getElementById('questionInput');
             const question = questionInput.value.trim();
@@ -571,6 +616,7 @@
             }
         }
         
+        // Display the answer and sources in the main panel
         function displayResponse(data) {
             const responseSection = document.getElementById('responseSection');
             const responseContent = document.getElementById('responseContent');
@@ -586,11 +632,11 @@
                 <div style="margin: 15px 0; line-height: 1.7;">${formattedAnswer}</div>
             `;
             
-            // Show sources
+            // Show sources below the answer
             let sourcesHtml = '<h4>Sources:</h4>';
             if (data.sources && data.sources.length > 0) {
                 data.sources.forEach((source, index) => {
-                    // Ensure default values
+                    // Ensure default values for author/year
                     const author = source.author ? source.author : 'Unknown';
                     const year = source.year ? source.year : 'N/A';
                     sourcesHtml += `
@@ -613,10 +659,11 @@
             sources.innerHTML = sourcesHtml;
             responseSection.classList.add('active');
             
-            // Scroll to response
+            // Scroll to response section
             responseSection.scrollIntoView({ behavior: 'smooth' });
         }
         
+        // Show error message in the main panel
         function showError(message) {
             const responseSection = document.getElementById('responseSection');
             const responseContent = document.getElementById('responseContent');
@@ -632,6 +679,7 @@
             responseSection.classList.add('active');
         }
         
+        // Show or hide the loading spinner
         function showLoading(show) {
             const loading = document.getElementById('loading');
             const responseSection = document.getElementById('responseSection');
@@ -644,6 +692,7 @@
             }
         }
         
+        // Enable or disable the ask button and input
         function setButtonState(enabled) {
             const button = document.getElementById('askButton');
             const input = document.getElementById('questionInput');
