@@ -371,7 +371,7 @@ def main():
     while True:
         query = input("\n❓ Your question: ").strip()
         
-        if query.lower() in ['quit', 'exit', 'wyjście']:
+        if query.lower() in ['quit', 'exit', 'end', 'stop', 'q']:
             break
         
         if not query:

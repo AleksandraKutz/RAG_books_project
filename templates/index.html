@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Classic Books RAG System</title>
-    <!-- FONTY: Playfair Display, Cinzel, Crimson Text, Libre Baskerville -->
+    <!-- FONTS: Playfair Display, Cinzel, Crimson Text, Libre Baskerville -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cinzel:wght@700&family=Crimson+Text:wght@400;700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* Tła tekstur: wood grain, parchment */
+        /* Background textures: wood grain, parchment */
         body {
             font-family: 'Crimson Text', 'Libre Baskerville', serif;
             background: url('https://www.transparenttextures.com/patterns/old-mathematics.png'), #E8E3D3;
@@ -321,7 +321,7 @@
             border-left: 5px solid #800020;
             font-family: 'Crimson Text', serif;
         }
-        /* Dekoracyjne ramki i linie */
+        /* Decorative frames and lines */
         .ornate-divider {
             border: none;
             border-top: 3px double #B8860B;
@@ -329,7 +329,7 @@
             height: 0;
             background: none;
         }
-        /* Responsywność */
+        /* Responsiveness */
         @media (max-width: 900px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -576,7 +576,7 @@
             const responseContent = document.getElementById('responseContent');
             const sources = document.getElementById('sources');
             
-            // Format answer bez podświetlania
+            // Format answer without highlighting
             const formattedAnswer = data.answer
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\n/g, '<br>');
@@ -590,7 +590,7 @@
             let sourcesHtml = '<h4>Sources:</h4>';
             if (data.sources && data.sources.length > 0) {
                 data.sources.forEach((source, index) => {
-                    // Upewnij się, że są wartości domyślne
+                    // Ensure default values
                     const author = source.author ? source.author : 'Unknown';
                     const year = source.year ? source.year : 'N/A';
                     sourcesHtml += `

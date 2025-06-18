@@ -18,3 +18,5 @@ Technologies:
 - Translation system for multi-language support
 
 The project was developed using modern AI tools (Claude, Cursor) to support the development process, enabling the implementation of advanced features and system performance optimization.
+
+The project was developed using modern AI tools (Claude, Cursor) to support the development process, enabling the implementation of advanced features, system performance optimization, and efficient creation of an elegant HTML interface.
